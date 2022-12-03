@@ -9,3 +9,4 @@ def _get_env(name: str) -> str:
 SECRET_KEY_JWT = _get_env("SECRET_KEY_JWT")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = int(_get_env("ACCESS_TOKEN_EXPIRE_MINUTES"))
+DB_URL = _get_env('DB_URL')

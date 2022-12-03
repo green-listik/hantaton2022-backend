@@ -4,6 +4,7 @@ from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 from sqlalchemy.ext.orderinglist import OrderingList, ordering_list
 from datetime import time
+import config
 
 
 class Base(DeclarativeBase):
@@ -85,10 +86,7 @@ class ExampleOperation(Base):
     parameters: Mapped[dict] = mapped_column(JSON())
 
 
-_DB_URL = os.getenv('DB_URL')
-if _DB_URL is None:
-    raise RuntimeError('`DB_URL` is not set')
-engine = create_async_engine(_DB_URL, echo=True)
+engine = create_async_engine(config.DB_URL, echo=True)
 async_session: async_sessionmaker = async_sessionmaker(engine, expire_on_commit=False)
 
 
