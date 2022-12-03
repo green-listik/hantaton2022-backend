@@ -38,6 +38,20 @@ async def get_current_user(session: AsyncSession = Depends(get_session), token: 
     return await get_user_from_jwt(session, token)
 
 
+def error(msg):
+    return {
+        "ok": False,
+        "obj": msg
+    }
+
+
+def ok(obj):
+    return {
+        "ok": True,
+        "obj": obj
+    }
+
+
 T = TypeVar('T')
 class ErrorModel(Generic[T], BaseModel):
     ok: bool
@@ -80,41 +94,47 @@ async def create_field(field: schemas.FieldBase, session: AsyncSession = Depends
     return res
 
 
-@app.post("/create_bush", response_model=schemas.Bush, dependencies=[Depends(admin_required)])
+@app.post("/create_bush", response_model=ErrorModel[schemas.Bush], dependencies=[Depends(admin_required)])
 async def create_bush(bush: schemas.BushCreate, session: AsyncSession = Depends(get_session)):
-    return await crud.create_bush(session, bush)
+    res = await crud.create_bush(session, bush)
+    if res is None:
+        return error("Не найдено месторождение с указанным")
+    return ok(res)
 
 
-@app.post("/create_well", response_model=schemas.Well, dependencies=[Depends(JWTBearer())])
+@app.post("/create_well", dependencies=[Depends(JWTBearer())])
 async def create_well(well: schemas.WellCreate, session: AsyncSession = Depends(get_session)):
-    return await crud.create_well(session, well)
+    res = await crud.create_well(session, well)
+    if res is None:
+        return error("Не найден куст с указанным ID")
+    return ok(res)
 
 
-@app.post("/create_event", response_model=schemas.Event, dependencies=[Depends(JWTBearer())])
+@app.post("/create_event", response_model=ErrorModel[schemas.Event], dependencies=[Depends(JWTBearer())])
 async def create_event(event: schemas.EventCreate, session: AsyncSession = Depends(get_session)):
-    return await crud.create_event(session, event)
+    res = await crud.create_event(session, event)
+    if res is None:
+        return error("Не найдена скважина с указанным ID")
+    return ok(res)
 
 
-@app.post("/get_event_by_id", response_model=ErrorModel[schemas.Event], dependencies=[Depends(JWTBearer())])
+@app.get("/get_event_by_id/{event_id}", response_model=ErrorModel[schemas.Event], dependencies=[Depends(JWTBearer())])
 async def get_event_by_id(event_id: int, session: AsyncSession = Depends(get_session)):
     res = await crud.get_event_by_id(session, event_id)
     if res is None:
-        return {
-            "ok": False,
-            "obj": "Не найдено мероприятие с указанным ID"
-        }
-    return {
-        "ok": True,
-        "obj": res
-    }
+        return error("Не найдено мероприятие с указанным ID")
+    return ok(res)
 
 
-@app.post("/create_operation", response_model=schemas.Operation, dependencies=[Depends(JWTBearer())])
+@app.post("/create_operation", response_model=ErrorModel[schemas.Operation], dependencies=[Depends(JWTBearer())])
 async def create_operation(operation: schemas.OperationCreate, session: AsyncSession = Depends(get_session)):
-    return await crud.create_operation(session, operation)
+    res = await crud.create_operation(session, operation)
+    if res is None:
+        return error("Не существует такого мероприятия")
+    return ok(res)
 
 
-@app.post("/create_example_operation", response_model=schemas.ExampleOperation, dependencies=[Depends(JWTBearer())])
+@app.post("/create_example_operation", response_model=ErrorModel[schemas.ExampleOperation], dependencies=[Depends(JWTBearer())])
 async def create_example_operation(operation: schemas.ExampleOperationCreate,
                                    session: AsyncSession = Depends(get_session)):
     return await crud.create_example_operation(session, operation)
@@ -128,30 +148,19 @@ async def delete_operation(operation_id: int, session=Depends(get_session)):
 @app.post("/update_operation_order", response_model=ErrorModel[schemas.Event], dependencies=[Depends(JWTBearer())])
 async def update_operation_order(event_id: int, new_order: list[int], session=Depends(get_session)):
     res = await crud.update_operation_order_for_event(session, event_id, new_order)
-    if isinstance(res, str):
-        return {
-            "ok": False,
-            "obj": res
-        }
     return {
-        "ok": True,
+        "ok": not isinstance(res, str),
         "obj": res
     }
 
 
-@app.post("/add_user", response_model=ErrorModel[schemas.User], dependencies=[Depends(JWTBearer()), Depends(admin_required)])
+@app.post("/add_user", response_model=ErrorModel[str], dependencies=[Depends(JWTBearer()), Depends(admin_required)])
 async def register(user: schemas.User, db=Depends(get_session)):
     db_user = await crud.get_user_by_username(db, user.username)
     if db_user:
-        return {
-            "ok": False,
-            "obj": "Пользователь уже зарегистрирован"
-        }
-    res = await crud.create_user(db=db, user=user)
-    return {
-        "ok": True,
-        "obj": res
-    }
+        return error("Пользователь уже зарегистрирован")
+    await crud.create_user(db=db, user=user)
+    return ok("")
 
 
 @app.post("/login", response_model=ErrorModel[str])
@@ -159,11 +168,5 @@ async def login(user: schemas.UserLoginSchema, session=Depends(get_session)):
     res = await crud.get_user_by_username(session, user.login)
     if res:
         if verify_password(user.password, res.password):
-            return {
-                "ok": True,
-                "obj": sign_jwt(res.username)['access_token']
-            }
-    return {
-        "ok": False,
-        "obj": "Неверные данные входа"
-    }
+            return ok(sign_jwt(res.username)['access_token'])
+    return error("Неверные данные входа")

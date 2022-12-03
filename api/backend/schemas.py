@@ -53,9 +53,6 @@ class BushCreate(BushBase):
 class Bush(BushBase):
     id: int
 
-    class Config:
-        orm_mode = True
-
 
 class EventBase(BaseModel):
     name: str
