@@ -82,6 +82,7 @@ class OperationCreate(OperationBase):
 
 
 class Operation(OperationBase):
+    order: int
     id: int
 
 
