@@ -8,6 +8,8 @@ import utils
 from security import decode_jwt, JWTBearer, verify_password, sign_jwt
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
+from typing import TypeVar, Generic, Dict
 
 
 async def get_user_from_jwt(session, token: str) -> models.User:
@@ -34,6 +36,12 @@ async def admin_required(token: str = Depends(JWTBearer()), session: AsyncSessio
 
 async def get_current_user(session: AsyncSession = Depends(get_session), token: str = Depends(JWTBearer())):
     return await get_user_from_jwt(session, token)
+
+
+T = TypeVar('T')
+class ErrorModel(Generic[T], BaseModel):
+    ok: bool
+    obj: T | str
 
 
 if os.getenv('LOCAL_INSTANCE') is None:
@@ -103,14 +111,18 @@ async def delete_operation(operation_id: int, session=Depends(get_session)):
     return (await crud.delete_operation(session, operation_id)) is not None
 
 
-@app.post("/update_operation_order", dependencies=[Depends(JWTBearer())])
+@app.post("/update_operation_order", response_model=ErrorModel[schemas.Event], dependencies=[Depends(JWTBearer())])
 async def update_operation_order(event_id: int, new_order: list[int], session=Depends(get_session)):
     res = await crud.update_operation_order_for_event(session, event_id, new_order)
     if isinstance(res, str):
         return {
-            "error": res
+            "ok": False,
+            "obj": res
         }
-    return res
+    return {
+        "ok": True,
+        "obj": res
+    }
 
 
 @app.post("/add_user", response_model=schemas.User, dependencies=[Depends(JWTBearer()), Depends(admin_required)])
@@ -121,12 +133,16 @@ async def register(user: schemas.User, db=Depends(get_session)):
     return await crud.create_user(db=db, user=user)
 
 
-@app.post("/login")
+@app.post("/login", response_model=ErrorModel[str])
 async def login(user: schemas.UserLoginSchema, session=Depends(get_session)):
     res = await crud.get_user_by_username(session, user.login)
     if res:
         if verify_password(user.password, res.password):
-            return sign_jwt(res.username)
+            return {
+                "ok": True,
+                "res": sign_jwt(res.username)['access_token']
+            }
     return {
-        "error": "Wrong login details!"
+        "ok": False,
+        "obj": "Неверные данные входа"
     }
