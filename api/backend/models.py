@@ -26,7 +26,7 @@ class Field(Base):
 
     name: Mapped[str] = mapped_column(primary_key=True)
 
-    bushes: Mapped[list["Bush"]] = relationship(back_populates="field")
+    bushes: Mapped[list["Bush"]] = relationship(back_populates="field", lazy="joined")
 
 
 class Bush(Base):
@@ -36,8 +36,8 @@ class Bush(Base):
     name: Mapped[str]
     field_name: Mapped[int] = mapped_column(ForeignKey("Fields.name"))
 
-    wells: Mapped[list["Well"]] = relationship(back_populates="bush")
-    field: Mapped["Field"] = relationship(back_populates="bushes")
+    wells: Mapped[list["Well"]] = relationship(back_populates="bush", lazy="joined")
+    field: Mapped["Field"] = relationship(back_populates="bushes", lazy="joined")
 
 
 class Well(Base):
@@ -48,8 +48,8 @@ class Well(Base):
     parameters: Mapped[dict] = mapped_column(JSON())
     bush_id: Mapped[int] = mapped_column(ForeignKey("Bushes.id"))
 
-    events: Mapped[list["Event"]] = relationship(back_populates="well")
-    bush: Mapped["Bush"] = relationship(back_populates="wells")
+    events: Mapped[list["Event"]] = relationship(back_populates="well", lazy="joined")
+    bush: Mapped["Bush"] = relationship(back_populates="wells", lazy="joined")
 
 
 class Event(Base):
@@ -60,8 +60,8 @@ class Event(Base):
     description: Mapped[str]
     well_id: Mapped[int] = mapped_column(ForeignKey("Wells.id"))
 
-    operations: Mapped[OrderingList["Operation"]] = relationship(collection_class=ordering_list("order", count_from=0), back_populates="event", order_by="Operation.order")
-    well: Mapped["Well"] = relationship(back_populates="events")
+    operations: Mapped[OrderingList["Operation"]] = relationship(collection_class=ordering_list("order", count_from=0), back_populates="event", order_by="Operation.order", lazy="joined")
+    well: Mapped["Well"] = relationship(back_populates="events", lazy="joined")
 
 
 class Operation(Base):
@@ -74,7 +74,7 @@ class Operation(Base):
     is_completed: Mapped[bool]
     event_id: Mapped[int] = mapped_column(ForeignKey("Events.id"))
 
-    event: Mapped["Event"] = relationship(back_populates="operations")
+    event: Mapped["Event"] = relationship(back_populates="operations", lazy="joined")
 
 
 class ExampleOperation(Base):

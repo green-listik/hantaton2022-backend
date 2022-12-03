@@ -130,3 +130,8 @@ class ExampleOperationBase(BaseModel):
 
 class ExampleOperation(ExampleOperationBase):
     pass
+
+
+class Dot(BaseModel):
+    day: int
+    depth: int
