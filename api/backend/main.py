@@ -81,6 +81,12 @@ async def create_operation(operation: schemas.OperationCreate, session: AsyncSes
     return await crud.create_operation(session, operation)
 
 
+@app.post("create_example_operation", response_model=schemas.ExampleOperation, dependencies=[Depends(JWTBearer())])
+async def create_example_operation(operation: schemas.ExampleOperationCreate,
+                                   session: AsyncSession = Depends(get_session)):
+    return await crud.create_example_operation(session, operation)
+
+
 @app.post("/delete_operation/{operation_id}", dependencies=[Depends(JWTBearer())], response_model=bool)
 async def delete_operation(operation_id: int, session=Depends(get_session)):
     return (await crud.delete_operation(session, operation_id)) is not None
