@@ -48,3 +48,7 @@ async def login(user: schemas.UserLoginSchema, session = Depends(get_session)):
     return {
         "error": "Wrong login details!"
     }
+
+@app.get("/fields", response_model=list[schemas.Field])
+async def fields(db=Depends(get_session)):
+    return await crud.get_fields(db=db)

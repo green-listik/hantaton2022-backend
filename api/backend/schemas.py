@@ -47,15 +47,6 @@ class BushBase(BaseModel):
         orm_mode = True
 
 
-class WellBase(BaseModel):
-    id: int
-    name: str
-    parameters: dict
-
-    class Config:
-        orm_mode = True
-
-
 class EventBase(BaseModel):
     id: int
     name: str
@@ -79,25 +70,31 @@ class Event(EventBase):
     operations: list[Operation]
 
 
-class Bush(BushBase):
-    wells: list[WellBase]
-
-
-class Well(WellBase):
+class Well(BaseModel):
+    id: int
+    name: str
+    parameters: dict
     events: list[Event]
+
+    class Config:
+        orm_mode = True
+
+
+class Bush(BushBase):
+    wells: list[Well]
+
+
+class Field(FieldBase):
+    bushes: list[Bush]
+
+    class Config:
+        orm_mode = True
 
 
 class ExampleOperationBase(BaseModel):
     id: int
     name: str
     parameters: dict
-
-    class Config:
-        orm_mode = True
-
-
-class Field(FieldBase):
-    bushes: list[Bush]
 
     class Config:
         orm_mode = True
