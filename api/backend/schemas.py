@@ -45,8 +45,8 @@ class UserLoginSchema(BaseModel):
 
 class OperationBase(BaseModel):
     id: int
-    type: str
-    parameters: list[str]
+    name: str
+    parameters: dict
     is_completed: bool
 
 
@@ -55,5 +55,12 @@ class Operation(OperationBase):
         orm_mode = True
 
 
-class CompletedOperation(Operation):
-    time: int
+class ExampleOperationBase(BaseModel):
+    id: int
+    name: str
+    parameters: dict
+
+
+class ExampleOperation(ExampleOperationBase):
+    class Config:
+        orm_mode = True

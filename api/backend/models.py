@@ -1,20 +1,87 @@
 import os
-from sqlalchemy import String
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+from sqlalchemy import String, ForeignKey, JSON
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
+from sqlalchemy.ext.orderinglist import OrderingList
+from datetime import time
 
 class Base(DeclarativeBase):
     pass
 
+
 class User(Base):
     __tablename__ = "Users"
 
-    username: Mapped[str] = mapped_column(String(256), primary_key=True)
+    username: Mapped[str] = mapped_column(primary_key=True)
     password: Mapped[str] = mapped_column(String(60))
-    first_name: Mapped[str] = mapped_column(String(256))
-    last_name: Mapped[str] = mapped_column(String(256))
-    middle_name: Mapped[str] = mapped_column(String(256))
-    is_admin: Mapped[bool] = mapped_column()
+    first_name: Mapped[str]
+    last_name: Mapped[str]
+    middle_name: Mapped[str]
+    is_admin: Mapped[bool]
+
+
+class Field(Base):
+    __tablename__ = "Fields"
+
+    name: Mapped[str] = mapped_column(primary_key=True)
+
+    bushes: Mapped[list["Bush"]] = relationship(back_populates="field")
+
+
+class Bush(Base):
+    __tablename__ = "Bushes"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str]
+    field_name: Mapped[int] = mapped_column(ForeignKey("Fields.name"))
+
+    wells: Mapped[list["Well"]] = relationship(back_populates="bush")
+    field: Mapped["Field"] = relationship(back_populates="bushes")
+
+
+class Well(Base):
+    __tablename__ = "Wells"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str]
+    parameters: Mapped[dict] = mapped_column(JSON())
+    bush_id: Mapped[int] = mapped_column(ForeignKey("Bushes.id"))
+
+    events: Mapped[list["Event"]] = relationship(back_populates="well")
+    bush: Mapped["Bush"] = relationship(back_populates="wells")
+
+
+class Event(Base):
+    __tablename__ = "Events"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str]
+    description: Mapped[str]
+    well_id: Mapped[int] = mapped_column(ForeignKey("Wells.id"))
+
+    operations: Mapped[OrderingList["Operation"]] = relationship(back_populates="event", order_by="Operation.order")
+    well: Mapped["Well"] = relationship(back_populates="events")
+
+
+class Operation(Base):
+    __tablename__ = "Operations"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    order: Mapped[int]
+    name: Mapped[str]
+    parameters: Mapped[dict] = mapped_column(JSON())
+    is_completed: Mapped[bool]
+    event_id: Mapped[int] = mapped_column(ForeignKey("Events.id"))
+
+    event: Mapped["Event"] = relationship(back_populates="operations")
+
+
+class ExampleOperation(Base):
+    __tablename__ = "ExampleOperations"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str]
+    parameters: Mapped[dict] = mapped_column(JSON())
 
 
 _DB_URL = os.getenv('DB_URL')
