@@ -36,7 +36,10 @@ async def get_current_user(session: AsyncSession = Depends(get_session), token: 
     return await get_user_from_jwt(session, token)
 
 
-app = FastAPI()
+if os.getenv('LOCAL_INSTANCE') is None:
+    app = FastAPI(root_path='/api')
+else:
+    app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
