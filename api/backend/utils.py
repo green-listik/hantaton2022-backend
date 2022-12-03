@@ -20,3 +20,20 @@ async def get_dots(db: AsyncSession, event_id: int) -> Dots | None:
         planned.append((planned_day, planned_depth))
         actual.append((actual_day, actual_depth))
     return Dots(planned=planned, actual=actual)
+
+
+async def get_data_of_event_for_excel(db: AsyncSession, event_id: int) -> dict | None:
+    event = await get_event_by_id(db, event_id)
+    if event is None:
+        return None
+    data = {
+        'name': event.name,
+        'description': event.description,
+        'operations': []
+    }
+    for operation in event.operations:
+        data['operations'].append({
+            'name': operation.name,
+            'parameters': operation.parameters
+        })
+    return data
