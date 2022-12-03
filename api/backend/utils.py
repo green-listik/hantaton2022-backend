@@ -30,18 +30,15 @@ async def get_dots(db: AsyncSession, event_id: int) -> Dots | None:
     return Dots(planned=planned, actual=actual)
 
 
-async def get_data_of_event_for_excel(db: AsyncSession, event_id: int) -> dict | None:
+async def get_data_of_event_for_excel(db: AsyncSession, event_id: int) -> list | None:
     event = await get_event_by_id(db, event_id)
     if event is None:
         return None
-    data = {
-        'name': event.name,
-        'description': event.description,
-        'operations': []
-    }
+    data = []
     for operation in event.operations:
-        data['operations'].append({
-            'name': replace_patterns_in_name(db, operation.well_id),
+        data.append({
+            'id': operation.order,
+            'name': replace_patterns_in_name(db, event.well_id),
             'parameters': operation.parameters
         })
     return data
