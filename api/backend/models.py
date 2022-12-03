@@ -72,7 +72,7 @@ class Operation(Base):
     order: Mapped[int]
     name: Mapped[str]
     parameters: Mapped[dict] = mapped_column(JSON())
-    is_completed: Mapped[bool]
+    is_complete: Mapped[bool]
     event_id: Mapped[int] = mapped_column(ForeignKey("Events.id"))
 
     event: Mapped["Event"] = relationship(back_populates="operations", lazy="joined")
