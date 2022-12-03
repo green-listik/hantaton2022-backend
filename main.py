@@ -3,22 +3,23 @@ from openpyxl.styles import Alignment, Font
 
 
 class Excel:
-    def __init__(self, file_name):
+    def __init__(self, file_name: str):
         self.numb_in_sec = 9
         self.file_name = file_name
         self.wb = openpyxl.Workbook()
         self.ws = self.wb.active
 
     def get_pattern(self, pattern_name: str):
+        """takes an excel file pattern"""
         self.wb = openpyxl.load_workbook("./" + pattern_name)
         self.ws = self.wb.active
         return self.__file_save()
 
     def __file_save(self):
+        """saves the file"""
         self.wb.save(self.file_name)
 
-    def __create_cells(self, cell, value, **kwargs):
-        # print(cell)
+    def __create_cells(self, cell: str, value, **kwargs):
         """creating a cell according to the specified parameters"""
         self.ws[cell].value = value
         if "merge_cell" in kwargs.keys():
@@ -30,8 +31,7 @@ class Excel:
         return {cell, value}
 
     def create_section(self, dict_sec: list, font_=Font(size=10, bold=False)):
-        # l = {"id": "A", "name": "B", "planned time": "C", "actuel time": "F", "actual depth": "H", "actual NPT": "K",
-        #      "Short details on NPT": "N", "ILT": "O", "Short details on ILT": "R"}
+        """recording operations in an excel file"""
         for elem in dict_sec:
             string = elem["parameters"]
             self.__create_cells(f"A{self.numb_in_sec}", elem["id"], font=font_,
@@ -49,8 +49,6 @@ class Excel:
                 self.__create_cells(f"D{self.numb_in_sec}", f"=C{self.numb_in_sec}/24", font=font_,
                                     alignment=Alignment(vertical="center", horizontal="center"))
 
-            # self.__create_cells(f"E{self.numb_in_sec}", string["hide column"], font=font_,
-            #                     alignment=Alignment(vertical="center", horizontal="center"))
             self.__create_cells(f"E{self.numb_in_sec}", string["planned depth"], font=font_,
                                 alignment=Alignment(vertical="center", horizontal="center"))
             self.__create_cells(f"F{self.numb_in_sec}", string["actual time"], font=font_,
@@ -125,6 +123,7 @@ class Excel:
         return self.__file_save()
 
 
+"""usage example"""
 # a = Excel("111.xlsx")
 # a.get_pattern("pattern.xlsx")
 #
