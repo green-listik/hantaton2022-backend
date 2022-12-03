@@ -7,6 +7,7 @@ import schemas
 import utils
 from security import decode_jwt, JWTBearer, verify_password, sign_jwt
 from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi.middleware.cors import CORSMiddleware
 
 
 async def get_user_from_jwt(session, token: str) -> models.User:
@@ -36,6 +37,13 @@ async def get_current_user(session: AsyncSession = Depends(get_session), token: 
 
 
 app = FastAPI()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 @app.on_event("startup")
