@@ -1,20 +1,6 @@
 from pydantic import BaseModel
 
 
-class ValueBase(BaseModel):
-    id: str
-    value: int
-
-
-class ValueCreate(ValueBase):
-    pass
-
-
-class Value(ValueBase):
-    class Config:
-        orm_mode = True
-
-
 class Token(BaseModel):
     access_token: str
     token_type: str
@@ -41,16 +27,62 @@ class User(UserBase):
 class UserLoginSchema(BaseModel):
     login: str
     password: str
+    class Config:
+        orm_mode = True
 
 
-class OperationBase(BaseModel):
+class FieldBase(BaseModel):
+    name: str
+    class Config:
+        orm_mode = True
+
+
+class Field(FieldBase):
+    bushes: list[Bush]
+    class Config:
+        orm_mode = True
+
+
+class BushBase(BaseModel):
+    id: int
+    name: str
+    class Config:
+        orm_mode = True
+
+
+class Bush(BushBase):
+    wells: list[WellBase]
+
+
+class WellBase(BaseModel):
     id: int
     name: str
     parameters: dict
-    is_completed: bool
+    class Config:
+        orm_mode = True
 
 
-class Operation(OperationBase):
+class Well(WellBase):
+    events: list[Event]
+
+
+class EventBase(BaseModel):
+    id: int
+    name: str
+    class Config:
+        orm_mode = True
+
+
+class Event(EventBase):
+    description: str
+    operations: list[Operation]
+
+
+class Operation(BaseModel):
+    id: int
+    name: str
+    parameters: dict
+    is_complete: bool
     class Config:
         orm_mode = True
 
@@ -59,8 +91,9 @@ class ExampleOperationBase(BaseModel):
     id: int
     name: str
     parameters: dict
+    class Config:
+        orm_mode = True
 
 
 class ExampleOperation(ExampleOperationBase):
-    class Config:
-        orm_mode = True
+    pass
