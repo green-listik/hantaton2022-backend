@@ -132,6 +132,6 @@ class ExampleOperation(ExampleOperationBase):
     pass
 
 
-class Dot(BaseModel):
-    day: int
-    depth: int
+class Dots(BaseModel):
+    planned: list[tuple[float, float]]
+    actual: list[tuple[float, float]]
