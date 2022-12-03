@@ -25,16 +25,14 @@ async def get_session() -> AsyncSession:
             return session
 
 
-async def admin_required(token: str, session: AsyncSession = Depends(get_session)):
+async def admin_required(token: str = Depends(JWTBearer()), session: AsyncSession = Depends(get_session)):
     user = await get_user_from_jwt(session, token)
     if not user.is_admin:
         raise HTTPException(status_code=403, detail="Admin required")
 
 
-async def login_required(token: str, session: AsyncSession = Depends(get_session)):
-    user = await get_user_from_jwt(session, token)
-    if user is None:
-        raise HTTPException(status_code=403, detail="Login required")
+async def get_current_user(session: AsyncSession = Depends(get_session), token: str = Depends(JWTBearer())):
+    return await get_user_from_jwt(session, token)
 
 
 app = FastAPI()
@@ -47,12 +45,12 @@ async def startup():
     await crud.create_user(session, models.User(username='admin', password='admin', is_admin=True))
 
 
-@app.get("/get_fields", response_model=list[schemas.Field], dependencies=[Depends(login_required)])
+@app.get("/get_fields", response_model=list[schemas.Field], dependencies=[Depends(JWTBearer())])
 async def get_fields(session: AsyncSession = Depends(get_session)):
     return await crud.get_fields(session)
 
 
-@app.get("/get_dots/{event_id}", response_model=schemas.Dots, dependencies=[Depends(login_required)])
+@app.get("/get_dots/{event_id}", response_model=schemas.Dots, dependencies=[Depends(JWTBearer())])
 async def get_dots(event_id, session: AsyncSession = Depends(get_session)):
     return await utils.get_dots(session, event_id)
 
@@ -73,23 +71,23 @@ async def create_well(well: schemas.WellCreate, session: AsyncSession = Depends(
     return await crud.create_well(session, well)
 
 
-@app.post("/create_event", response_model=schemas.Event)
+@app.post("/create_event", response_model=schemas.Event, dependencies=[Depends(JWTBearer())])
 async def create_event(event: schemas.EventCreate, session: AsyncSession = Depends(get_session)):
     return await crud.create_event(session, event)
 
 
-@app.post("/create_operation", response_model=schemas.Operation)
+@app.post("/create_operation", response_model=schemas.Operation, dependencies=[Depends(JWTBearer())])
 async def create_operation(operation: schemas.OperationCreate, session: AsyncSession = Depends(get_session)):
     return await crud.create_operation(session, operation)
 
 
-@app.post("/delete_operation/{operation_id}", response_model=bool)
-async def delete_operation(operation_id: int, session = Depends(get_session)):
+@app.post("/delete_operation/{operation_id}", dependencies=[Depends(JWTBearer())], response_model=bool)
+async def delete_operation(operation_id: int, session=Depends(get_session)):
     return (await crud.delete_operation(session, operation_id)) is not None
 
 
-@app.post("/update_operation_order")
-async def update_operation_order(event_id: int, new_order: list[int], session = Depends(get_session)):
+@app.post("/update_operation_order", dependencies=[Depends(JWTBearer())])
+async def update_operation_order(event_id: int, new_order: list[int], session=Depends(get_session)):
     res = await crud.update_operation_order_for_event(session, event_id, new_order)
     if isinstance(res, str):
         return {
@@ -98,7 +96,7 @@ async def update_operation_order(event_id: int, new_order: list[int], session = 
     return res
 
 
-@app.post("/add_user", response_model=schemas.User, dependencies=[Depends(JWTBearer), Depends(admin_required)])
+@app.post("/add_user", response_model=schemas.User, dependencies=[Depends(JWTBearer()), Depends(admin_required)])
 async def register(user: schemas.User, db=Depends(get_session)):
     db_user = await crud.get_user_by_username(db, user.username)
     if db_user:
