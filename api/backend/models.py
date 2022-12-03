@@ -5,6 +5,7 @@ from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 from sqlalchemy.ext.orderinglist import OrderingList
 from datetime import time
 
+
 class Base(DeclarativeBase):
     pass
 
@@ -14,9 +15,9 @@ class User(Base):
 
     username: Mapped[str] = mapped_column(primary_key=True)
     password: Mapped[str] = mapped_column(String(60))
-    first_name: Mapped[str]
-    last_name: Mapped[str]
-    middle_name: Mapped[str]
+    first_name: Mapped[str | None]
+    last_name: Mapped[str | None]
+    middle_name: Mapped[str | None]
     is_admin: Mapped[bool]
 
 
