@@ -1,7 +1,15 @@
 from sqlalchemy.ext.asyncio import AsyncSession
-
-from crud import get_event_by_id
+import re
+from crud import get_well_by_id, get_event_by_id
 from schemas import Dots
+
+
+async def replace_patterns_in_name(db: AsyncSession, well_id: int) -> str | None:
+    well = await get_well_by_id(db, well_id)
+    if well is None:
+        return None
+    parameters = well.parameters
+    return re.sub(r'%(.*)%', lambda x: parameters.get(x.group(1)), 'asdasd %123%')
 
 
 async def get_dots(db: AsyncSession, event_id: int) -> Dots | None:
@@ -33,7 +41,7 @@ async def get_data_of_event_for_excel(db: AsyncSession, event_id: int) -> dict |
     }
     for operation in event.operations:
         data['operations'].append({
-            'name': operation.name,
+            'name': replace_patterns_in_name(db, operation.well_id),
             'parameters': operation.parameters
         })
     return data
