@@ -83,6 +83,21 @@ async def create_operation(operation: schemas.OperationCreate, session: AsyncSes
     return await crud.create_operation(session, operation)
 
 
+@app.post("/delete_operation/{operation_id}", response_model=bool)
+async def delete_operation(operation_id: int, session = Depends(get_session)):
+    return (await crud.delete_operation(session, operation_id)) is not None
+
+
+@app.post("/update_operation_order")
+async def update_operation_order(event_id: int, new_order: list[int], session = Depends(get_session)):
+    res = await crud.update_operation_order_for_event(session, event_id, new_order)
+    if isinstance(res, str):
+        return {
+            "error": res
+        }
+    return res
+
+
 @app.post("/add_user", response_model=schemas.User, dependencies=[Depends(JWTBearer), Depends(admin_required)])
 async def register(user: schemas.User, db=Depends(get_session)):
     db_user = await crud.get_user_by_username(db, user.username)
