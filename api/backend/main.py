@@ -4,6 +4,7 @@ from fastapi import FastAPI, Depends, HTTPException
 import crud
 import models
 import schemas
+import utils
 from security import decode_jwt, JWTBearer, verify_password, sign_jwt
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -51,9 +52,10 @@ async def get_fields(session: AsyncSession = Depends(get_session)):
     return await crud.get_fields(session)
 
 
-@app.get("/get_dots/{event_id}", response_model=list[schemas.Dot], dependencies=[Depends(login_required)])
-async def get_dots(session: AsyncSession = Depends(get_session)):
-    pass
+@app.get("/get_dots/{event_id}", response_model=schemas.Dots, dependencies=[Depends(login_required)])
+async def get_dots(event_id, session: AsyncSession = Depends(get_session)):
+    return await utils.get_dots(session, event_id)
+
 
 @app.post("/create_field", response_model=schemas.FieldBase, dependencies=[Depends(admin_required)])
 async def create_field(field: schemas.FieldBase, session: AsyncSession = Depends(get_session)):

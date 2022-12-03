@@ -4,15 +4,15 @@ services:
     build: api
     environment:
       DB_URL: 'sqlite+aiosqlite:////dbdata/api.db'
+      SECRET_KEY_JWT: '123'
+      ACCESS_TOKEN_EXPIRE_MINUTES: 3000
       MAX_WORKERS: "1" # race condition with multiple workers?
     volumes:
       - db-data:/dbdata
-  frontend:
-    build: frontend
   nginx:
     image: "nginx:stable-alpine"
     ports:
-      - "8080:80"
+      - "8081:80"
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
 volumes:
