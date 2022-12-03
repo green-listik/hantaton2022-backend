@@ -1,20 +1,6 @@
 from pydantic import BaseModel
 
 
-class ValueBase(BaseModel):
-    id: str
-    value: int
-
-
-class ValueCreate(ValueBase):
-    pass
-
-
-class Value(ValueBase):
-    class Config:
-        orm_mode = True
-
-
 class Token(BaseModel):
     access_token: str
     token_type: str
@@ -42,18 +28,80 @@ class UserLoginSchema(BaseModel):
     login: str
     password: str
 
-
-class OperationBase(BaseModel):
-    id: int
-    type: str
-    parameters: list[str]
-    is_completed: bool
-
-
-class Operation(OperationBase):
     class Config:
         orm_mode = True
 
 
-class CompletedOperation(Operation):
-    time: int
+class FieldBase(BaseModel):
+    name: str
+
+    class Config:
+        orm_mode = True
+
+
+class BushBase(BaseModel):
+    id: int
+    name: str
+
+    class Config:
+        orm_mode = True
+
+
+class WellBase(BaseModel):
+    id: int
+    name: str
+    parameters: dict
+
+    class Config:
+        orm_mode = True
+
+
+class EventBase(BaseModel):
+    id: int
+    name: str
+
+    class Config:
+        orm_mode = True
+
+
+class Operation(BaseModel):
+    id: int
+    name: str
+    parameters: dict
+    is_complete: bool
+
+    class Config:
+        orm_mode = True
+
+
+class Event(EventBase):
+    description: str
+    operations: list[Operation]
+
+
+class Bush(BushBase):
+    wells: list[WellBase]
+
+
+class Well(WellBase):
+    events: list[Event]
+
+
+class ExampleOperationBase(BaseModel):
+    id: int
+    name: str
+    parameters: dict
+
+    class Config:
+        orm_mode = True
+
+
+class Field(FieldBase):
+    bushes: list[Bush]
+
+    class Config:
+        orm_mode = True
+
+
+class ExampleOperation(ExampleOperationBase):
+    pass
