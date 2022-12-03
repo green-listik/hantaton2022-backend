@@ -24,7 +24,7 @@ async def get_session() -> AsyncSession:
             return session
 
 
-async def admin_required(session, token: str):
+async def admin_required(token: str, session: AsyncSession = Depends(get_session)):
     user = await get_user_from_jwt(session, token)
     if not user.is_admin:
         raise HTTPException(status_code=403, detail="Admin required")
@@ -47,8 +47,38 @@ async def startup():
 
 
 @app.get("/get_fields", response_model=list[schemas.Field], dependencies=[Depends(login_required)])
-async def get_fields(token: str = Depends(JWTBearer), session: AsyncSession = Depends(get_session)):
+async def get_fields(session: AsyncSession = Depends(get_session)):
     return await crud.get_fields(session)
+
+
+@app.get("/get_dots/{event_id}", response_model=list[schemas.Dot], dependencies=[Depends(login_required)])
+async def get_dots(session: AsyncSession = Depends(get_session)):
+    pass
+
+@app.post("/create_field", response_model=schemas.FieldBase, dependencies=[Depends(admin_required)])
+async def create_field(field: schemas.FieldBase, session: AsyncSession = Depends(get_session)):
+    res = await crud.create_field(session, field)
+    return res
+
+
+@app.post("/create_bush", response_model=schemas.Bush, dependencies=[Depends(admin_required)])
+async def create_bush(bush: schemas.BushCreate, session: AsyncSession = Depends(get_session)):
+    return await crud.create_bush(session, bush)
+
+
+@app.post("/create_well", response_model=schemas.Well, dependencies=[Depends(admin_required)])
+async def create_well(well: schemas.WellCreate, session: AsyncSession = Depends(get_session)):
+    return await crud.create_well(session, well)
+
+
+@app.post("/create_event", response_model=schemas.Event)
+async def create_event(event: schemas.EventCreate, session: AsyncSession = Depends(get_session)):
+    return await crud.create_event(session, event)
+
+
+@app.post("/create_operation", response_model=schemas.Operation)
+async def create_operation(operation: schemas.OperationCreate, session: AsyncSession = Depends(get_session)):
+    return await crud.create_operation(session, operation)
 
 
 @app.post("/add_user", response_model=schemas.User, dependencies=[Depends(JWTBearer), Depends(admin_required)])

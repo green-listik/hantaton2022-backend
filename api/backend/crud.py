@@ -7,7 +7,7 @@ from typing import Sequence
 
 
 async def get_user_by_username(db: AsyncSession, username: str) -> User | None:
-    res = (await db.execute(select(User).where(User.username == username))).scalars().one_or_none()
+    res = (await db.execute(select(User).where(User.username == username))).scalars().unique().one_or_none()
     return res
 
 
@@ -38,11 +38,11 @@ async def create_field(db: AsyncSession, field: schemas.FieldBase) -> Field:
 
 
 async def get_fields(db: AsyncSession) -> Sequence[Field]:
-    return (await db.execute(select(Field))).scalars().all()
+    return (await db.execute(select(Field))).scalars().unique().unique().all()
 
 
 async def get_field_by_name(db: AsyncSession, name: str) -> Field | None:
-    return (await db.execute(select(Field).where(Field.name == name))).scalars().one_or_none()
+    return (await db.execute(select(Field).where(Field.name == name))).scalars().unique().one_or_none()
 
 
 async def create_bush(db: AsyncSession, bush: schemas.BushCreate) -> Bush | None:
@@ -61,7 +61,7 @@ async def create_bush(db: AsyncSession, bush: schemas.BushCreate) -> Bush | None
 
 
 async def get_bush_by_id(db: AsyncSession, id: int) -> Bush | None:
-    return (await db.execute(select(Bush).where(Bush.id == id))).scalars().one_or_none()
+    return (await db.execute(select(Bush).where(Bush.id == id))).scalars().unique().one_or_none()
 
 
 async def create_well(db: AsyncSession, well: schemas.WellCreate) -> Well | None:
@@ -81,7 +81,7 @@ async def create_well(db: AsyncSession, well: schemas.WellCreate) -> Well | None
 
 
 async def get_well_by_id(db: AsyncSession, id: int) -> Well | None:
-    return (await db.execute(select(Well).where(Well.id == id))).scalars().one_or_none()
+    return (await db.execute(select(Well).where(Well.id == id))).scalars().unique().one_or_none()
 
 
 async def create_event(db: AsyncSession, event: schemas.EventCreate) -> Event | None:
@@ -101,7 +101,7 @@ async def create_event(db: AsyncSession, event: schemas.EventCreate) -> Event | 
 
 
 async def get_event_by_id(db: AsyncSession, id: int) -> Event | None:
-    return (await db.execute(select(Event).where(Event.id == id))).scalars().one_or_none()
+    return (await db.execute(select(Event).where(Event.id == id))).scalars().unique().one_or_none()
 
 
 async def create_operation(db: AsyncSession, operation: schemas.OperationCreate) -> Operation | None:
@@ -122,12 +122,12 @@ async def create_operation(db: AsyncSession, operation: schemas.OperationCreate)
 
 
 async def get_operation_by_id(db: AsyncSession, id: int) -> Operation | None:
-    return (await db.execute(select(Operation).where(Operation.id == id))).scalars().one_or_none()
+    return (await db.execute(select(Operation).where(Operation.id == id))).scalars().unique().one_or_none()
 
 
 async def get_example_operation_by_id(db: AsyncSession, id: int) -> ExampleOperation | None:
-    return (await db.execute(select(ExampleOperation).where(ExampleOperation.id == id))).scalars().one_or_none()
+    return (await db.execute(select(ExampleOperation).where(ExampleOperation.id == id))).scalars().unique().one_or_none()
 
 
 async def get_example_operations_by_name(db: AsyncSession, name: str) -> Sequence[ExampleOperation]:
-    return (await db.execute(select(ExampleOperation).where(ExampleOperation.name == name))).scalars().all()
+    return (await db.execute(select(ExampleOperation).where(ExampleOperation.name == name))).scalars().unique().all()
