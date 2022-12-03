@@ -84,6 +84,16 @@ async def get_well_by_id(db: AsyncSession, id: int) -> Well | None:
     return (await db.execute(select(Well).where(Well.id == id))).scalars().unique().one_or_none()
 
 
+async def update_parameters_of_well(db: AsyncSession, well_id: int, new_parameters: dict) -> Well | None:
+    well = await get_well_by_id(db, well_id)
+    if well is None:
+        return None
+    well.parameters |= new_parameters
+    await db.commit()
+    await db.refresh(well)
+    return well
+
+
 async def create_event(db: AsyncSession, event: schemas.EventCreate) -> Event | None:
     well = await get_well_by_id(db, event.well_id)
     if well is None:
@@ -142,6 +152,16 @@ async def create_operation(db: AsyncSession, operation: schemas.OperationCreate)
     await db.commit()
     await db.refresh(db_operation)
     return db_operation
+
+
+async def update_parameters_of_operation(db: AsyncSession, operation_id: int, new_parameters: dict) -> Operation | None:
+    operation = await get_operation_by_id(db, operation_id)
+    if operation is None:
+        return None
+    operation.parameters |= new_parameters
+    await db.commit()
+    await db.refresh(operation)
+    return operation
 
 
 async def delete_operation(db: AsyncSession, operation_id: int) -> Event | None:
