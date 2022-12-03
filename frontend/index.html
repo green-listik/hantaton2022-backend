@@ -1,0 +1,15 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<title>Hello!</title>
+	</head>
+	<body>
+		<button onclick="update()">print them out in console</button>
+		<script>
+			async function update() {
+				var r = await fetch('/api/values');
+				console.log(await r.json())
+			}
+		</script>
+	</body>
+</html>
