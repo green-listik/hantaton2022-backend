@@ -104,6 +104,28 @@ async def get_event_by_id(db: AsyncSession, id: int) -> Event | None:
     return (await db.execute(select(Event).where(Event.id == id))).scalars().unique().one_or_none()
 
 
+async def update_operation_order_for_event(db: AsyncSession, event_id: int, new_order: list[int]) -> Event | str:
+    event = await get_event_by_id(db, event_id)
+    if event is None:
+        return "Нет такого мероприятия"
+    operations_count = len(event.operations)
+    are_indices_valid = True
+    for i in new_order:
+        if i < 0 or i >= operations_count:
+            are_indices_valid = False
+            break
+    if len(new_order) != operations_count \
+            or len(set(new_order)) != operations_count \
+            or not are_indices_valid:
+        return "Неверно задан порядок"
+    for i in range(operations_count):
+        event.operations[i].order = new_order[i]
+    event.operations.reorder()
+    await db.commit()
+    await db.refresh(event)
+    return event
+
+
 async def create_operation(db: AsyncSession, operation: schemas.OperationCreate) -> Operation | None:
     event = await get_event_by_id(db, operation.event_id)
     if event is None:
@@ -116,9 +138,25 @@ async def create_operation(db: AsyncSession, operation: schemas.OperationCreate)
     )
     db.add(db_operation)
     event.operations.append(db_operation)
+    event.operations.reorder()
     await db.commit()
     await db.refresh(db_operation)
     return db_operation
+
+
+async def delete_operation(db: AsyncSession, operation_id: int) -> Event | None:
+    operation = await get_operation_by_id(db, operation_id)
+    if operation is None:
+        return None
+    event = await get_event_by_id(db, operation.event_id)
+    if event is None:
+        raise RuntimeError("Event not found, even though operation did? o_0")
+    event.operations.pop(index=operation.order)
+    event.operations.reorder()
+    await db.delete(operation)
+    await db.commit()
+    await db.refresh(event)
+    return event
 
 
 async def get_operation_by_id(db: AsyncSession, id: int) -> Operation | None:
