@@ -120,7 +120,6 @@ class Field(FieldBase):
 
 
 class ExampleOperationBase(BaseModel):
-    id: int
     name: str
     parameters: dict
 
@@ -128,9 +127,12 @@ class ExampleOperationBase(BaseModel):
         orm_mode = True
 
 
-class ExampleOperation(ExampleOperationBase):
+class ExampleOperationCreate(ExampleOperationBase):
     pass
 
+
+class ExampleOperation(ExampleOperationBase):
+    id: int
 
 class Dots(BaseModel):
     planned: list[tuple[float, float]]

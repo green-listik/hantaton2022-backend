@@ -183,6 +183,17 @@ async def get_operation_by_id(db: AsyncSession, id: int) -> Operation | None:
     return (await db.execute(select(Operation).where(Operation.id == id))).scalars().unique().one_or_none()
 
 
+async def create_example_operation(db: AsyncSession, operation: schemas.ExampleOperationCreate) -> ExampleOperation:
+    db_operation = ExampleOperation(
+        name=operation.name,
+        parameters=operation.parameters
+    )
+    db.add(db_operation)
+    await db.commit()
+    await db.refresh(db_operation)
+    return db_operation
+
+
 async def get_example_operation_by_id(db: AsyncSession, id: int) -> ExampleOperation | None:
     return (await db.execute(select(ExampleOperation).where(ExampleOperation.id == id))).scalars().unique().one_or_none()
 
