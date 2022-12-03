@@ -1,6 +1,5 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from api.backend.schemas import Dots
 from crud import get_event_by_id
 from schemas import Dots
 
