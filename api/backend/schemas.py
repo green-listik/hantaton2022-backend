@@ -40,8 +40,16 @@ class FieldBase(BaseModel):
 
 
 class BushBase(BaseModel):
-    id: int
     name: str
+
+    class Config:
+        orm_mode = True
+
+class BushCreate(BushBase):
+    pass
+
+class Bush(BaseModel):
+    id: int
 
     class Config:
         orm_mode = True
@@ -74,18 +82,18 @@ class Well(BaseModel):
     id: int
     name: str
     parameters: dict
-    events: list[Event]
+    events: list[EventBase]
 
     class Config:
         orm_mode = True
 
 
-class Bush(BushBase):
+class BushExtended(Bush):
     wells: list[Well]
 
 
 class Field(FieldBase):
-    bushes: list[Bush]
+    bushes: list[BushExtended]
 
     class Config:
         orm_mode = True
