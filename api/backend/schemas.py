@@ -45,10 +45,12 @@ class BushBase(BaseModel):
     class Config:
         orm_mode = True
 
-class BushCreate(BushBase):
-    pass
 
-class Bush(BaseModel):
+class BushCreate(BushBase):
+    field_name: str
+
+
+class Bush(BushBase):
     id: int
 
     class Config:
@@ -56,15 +58,18 @@ class Bush(BaseModel):
 
 
 class EventBase(BaseModel):
-    id: int
     name: str
 
     class Config:
         orm_mode = True
 
 
-class Operation(BaseModel):
-    id: int
+class EventCreate(EventBase):
+    well_id: int
+    description: str
+
+
+class OperationBase(BaseModel):
     name: str
     parameters: dict
     is_complete: bool
@@ -72,20 +77,35 @@ class Operation(BaseModel):
     class Config:
         orm_mode = True
 
+class OperationCreate(OperationBase):
+    event_id: int
+
+
+class Operation(OperationBase):
+    id: int
+
 
 class Event(EventBase):
+    id: int
     description: str
     operations: list[Operation]
 
 
-class Well(BaseModel):
-    id: int
+class WellBase(BaseModel):
     name: str
     parameters: dict
-    events: list[EventBase]
 
     class Config:
         orm_mode = True
+
+
+class WellCreate(WellBase):
+    bush_id: int
+
+
+class Well(WellBase):
+    id: int
+    events: list[Event]
 
 
 class BushExtended(Bush):

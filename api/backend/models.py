@@ -2,7 +2,7 @@ import os
 from sqlalchemy import String, ForeignKey, JSON
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
-from sqlalchemy.ext.orderinglist import OrderingList
+from sqlalchemy.ext.orderinglist import OrderingList, ordering_list
 from datetime import time
 
 
@@ -32,7 +32,7 @@ class Field(Base):
 class Bush(Base):
     __tablename__ = "Bushes"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     name: Mapped[str]
     field_name: Mapped[int] = mapped_column(ForeignKey("Fields.name"))
 
@@ -43,7 +43,7 @@ class Bush(Base):
 class Well(Base):
     __tablename__ = "Wells"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     name: Mapped[str]
     parameters: Mapped[dict] = mapped_column(JSON())
     bush_id: Mapped[int] = mapped_column(ForeignKey("Bushes.id"))
@@ -55,19 +55,19 @@ class Well(Base):
 class Event(Base):
     __tablename__ = "Events"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     name: Mapped[str]
     description: Mapped[str]
     well_id: Mapped[int] = mapped_column(ForeignKey("Wells.id"))
 
-    operations: Mapped[OrderingList["Operation"]] = relationship(back_populates="event", order_by="Operation.order")
+    operations: Mapped[OrderingList["Operation"]] = relationship(collection_class=ordering_list("order", count_from=0), back_populates="event", order_by="Operation.order")
     well: Mapped["Well"] = relationship(back_populates="events")
 
 
 class Operation(Base):
     __tablename__ = "Operations"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     order: Mapped[int]
     name: Mapped[str]
     parameters: Mapped[dict] = mapped_column(JSON())
@@ -80,7 +80,7 @@ class Operation(Base):
 class ExampleOperation(Base):
     __tablename__ = "ExampleOperations"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     name: Mapped[str]
     parameters: Mapped[dict] = mapped_column(JSON())
 

@@ -26,26 +26,108 @@ async def create_user(db: AsyncSession, user: schemas.User) -> User:
     await db.refresh(db_user)
     return db_user
 
+
+async def create_field(db: AsyncSession, field: schemas.FieldBase) -> Field:
+    db_field = Field(
+        name=field.name
+    )
+    db.add(db_field)
+    await db.commit()
+    await db.refresh(db_field)
+    return db_field
+
+
 async def get_fields(db: AsyncSession) -> Sequence[Field]:
     return (await db.execute(select(Field))).scalars().all()
+
 
 async def get_field_by_name(db: AsyncSession, name: str) -> Field | None:
     return (await db.execute(select(Field).where(Field.name == name))).scalars().one_or_none()
 
+
+async def create_bush(db: AsyncSession, bush: schemas.BushCreate) -> Bush | None:
+    field = await get_field_by_name(db, bush.field_name)
+    if field is None:
+        return None
+    db_bush = Bush(
+        name=bush.name,
+        field_name=bush.field_name
+    )
+    field.bushes.append(db_bush)
+    db.add(db_bush)
+    await db.commit()
+    await db.refresh(db_bush)
+    return db_bush
+
+
 async def get_bush_by_id(db: AsyncSession, id: int) -> Bush | None:
     return (await db.execute(select(Bush).where(Bush.id == id))).scalars().one_or_none()
+
+
+async def create_well(db: AsyncSession, well: schemas.WellCreate) -> Well | None:
+    bush = await get_bush_by_id(db, well.bush_id)
+    if bush is None:
+        return None
+    db_well = Well(
+        name=well.name,
+        parameters=well.parameters,
+        bush_id=well.bush_id,
+    )
+    db.add(db_well)
+    bush.wells.append(db_well)
+    await db.commit()
+    await db.refresh(db_well)
+    return db_well
+
 
 async def get_well_by_id(db: AsyncSession, id: int) -> Well | None:
     return (await db.execute(select(Well).where(Well.id == id))).scalars().one_or_none()
 
+
+async def create_event(db: AsyncSession, event: schemas.EventCreate) -> Event | None:
+    well = await get_well_by_id(db, event.well_id)
+    if well is None:
+        return None
+    db_event = Event(
+        name=event.name,
+        description=event.description,
+        well_id=event.well_id
+    )
+    db.add(db_event)
+    well.events.append(db_event)
+    await db.commit()
+    await db.refresh(db_event)
+    return db_event
+
+
 async def get_event_by_id(db: AsyncSession, id: int) -> Event | None:
     return (await db.execute(select(Event).where(Event.id == id))).scalars().one_or_none()
+
+
+async def create_operation(db: AsyncSession, operation: schemas.OperationCreate) -> Operation | None:
+    event = await get_event_by_id(db, operation.event_id)
+    if event is None:
+        return None
+    db_operation = Operation(
+        name=operation.name,
+        parameters=operation.parameters,
+        is_complete=operation.is_complete,
+        event_id=operation.event_id
+    )
+    db.add(db_operation)
+    event.operations.append(db_operation)
+    await db.commit()
+    await db.refresh(db_operation)
+    return db_operation
+
 
 async def get_operation_by_id(db: AsyncSession, id: int) -> Operation | None:
     return (await db.execute(select(Operation).where(Operation.id == id))).scalars().one_or_none()
 
+
 async def get_example_operation_by_id(db: AsyncSession, id: int) -> ExampleOperation | None:
     return (await db.execute(select(ExampleOperation).where(ExampleOperation.id == id))).scalars().one_or_none()
+
 
 async def get_example_operations_by_name(db: AsyncSession, name: str) -> Sequence[ExampleOperation]:
     return (await db.execute(select(ExampleOperation).where(ExampleOperation.name == name))).scalars().all()
