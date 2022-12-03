@@ -1,5 +1,5 @@
 import os
-
+import sys
 from fastapi import FastAPI, Depends, HTTPException
 import crud
 import models
@@ -91,31 +91,31 @@ async def get_dots(event_id, session: AsyncSession = Depends(get_session)):
 @app.post("/create_field", response_model=schemas.FieldBase, dependencies=[Depends(admin_required)])
 async def create_field(field: schemas.FieldBase, session: AsyncSession = Depends(get_session)):
     res = await crud.create_field(session, field)
-    return res
+    return schemas.FieldBase.from_orm(res)
 
 
-@app.post("/create_bush", response_model=ErrorModel[schemas.Bush], dependencies=[Depends(admin_required)])
+@app.post("/create_bush", response_model=ErrorModel[int], dependencies=[Depends(admin_required)])
 async def create_bush(bush: schemas.BushCreate, session: AsyncSession = Depends(get_session)):
     res = await crud.create_bush(session, bush)
     if res is None:
         return error("Не найдено месторождение с указанным")
-    return ok(res)
+    return ok(res.id)
 
 
-@app.post("/create_well", dependencies=[Depends(JWTBearer())])
+@app.post("/create_well", response_model=ErrorModel[int], dependencies=[Depends(JWTBearer())])
 async def create_well(well: schemas.WellCreate, session: AsyncSession = Depends(get_session)):
     res = await crud.create_well(session, well)
     if res is None:
         return error("Не найден куст с указанным ID")
-    return ok(res)
+    return ok(res.id)
 
 
-@app.post("/create_event", response_model=ErrorModel[schemas.Event], dependencies=[Depends(JWTBearer())])
+@app.post("/create_event", response_model=ErrorModel[int], dependencies=[Depends(JWTBearer())])
 async def create_event(event: schemas.EventCreate, session: AsyncSession = Depends(get_session)):
     res = await crud.create_event(session, event)
     if res is None:
         return error("Не найдена скважина с указанным ID")
-    return ok(res)
+    return ok(res.id)
 
 
 @app.get("/get_event_by_id/{event_id}", response_model=ErrorModel[schemas.Event], dependencies=[Depends(JWTBearer())])
@@ -123,21 +123,21 @@ async def get_event_by_id(event_id: int, session: AsyncSession = Depends(get_ses
     res = await crud.get_event_by_id(session, event_id)
     if res is None:
         return error("Не найдено мероприятие с указанным ID")
-    return ok(res)
+    return ok(schemas.Event.from_orm(res))
 
 
-@app.post("/create_operation", response_model=ErrorModel[schemas.Operation], dependencies=[Depends(JWTBearer())])
+@app.post("/create_operation", response_model=ErrorModel[int], dependencies=[Depends(JWTBearer())])
 async def create_operation(operation: schemas.OperationCreate, session: AsyncSession = Depends(get_session)):
     res = await crud.create_operation(session, operation)
     if res is None:
         return error("Не существует такого мероприятия")
-    return ok(res)
+    return ok(res.id)
 
 
-@app.post("/create_example_operation", response_model=ErrorModel[schemas.ExampleOperation], dependencies=[Depends(JWTBearer())])
+@app.post("/create_example_operation", response_model=schemas.ExampleOperation, dependencies=[Depends(JWTBearer())])
 async def create_example_operation(operation: schemas.ExampleOperationCreate,
                                    session: AsyncSession = Depends(get_session)):
-    return await crud.create_example_operation(session, operation)
+    return schemas.ExampleOperation.from_orm(await crud.create_example_operation(session, operation))
 
 
 @app.post("/delete_operation/{operation_id}", dependencies=[Depends(JWTBearer())], response_model=bool)
