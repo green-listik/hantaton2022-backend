@@ -66,7 +66,7 @@ async def create_bush(bush: schemas.BushCreate, session: AsyncSession = Depends(
     return await crud.create_bush(session, bush)
 
 
-@app.post("/create_well", response_model=schemas.Well, dependencies=[Depends(admin_required)])
+@app.post("/create_well", response_model=schemas.Well, dependencies=[Depends(JWTBearer())])
 async def create_well(well: schemas.WellCreate, session: AsyncSession = Depends(get_session)):
     return await crud.create_well(session, well)
 
