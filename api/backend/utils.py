@@ -38,7 +38,7 @@ async def get_data_of_event_for_excel(db: AsyncSession, event_id: int) -> list |
     for operation in event.operations:
         data.append({
             'id': operation.order,
-            'name': replace_patterns_in_name(db, event.well_id),
+            'name': await replace_patterns_in_name(db, event.well_id),
             'parameters': operation.parameters
         })
     return data
