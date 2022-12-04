@@ -4,12 +4,12 @@ from crud import get_well_by_id, get_event_by_id
 from schemas import Dots
 
 
-async def replace_patterns_in_name(db: AsyncSession, well_id: int) -> str | None:
+async def replace_patterns_in_name(db: AsyncSession, well_id: int, operation_name: str) -> str | None:
     well = await get_well_by_id(db, well_id)
     if well is None:
         return None
     parameters: dict = well.parameters
-    return re.sub(r'%(.*)%', lambda x: parameters.get(x.group(1), '%NOT FOUND%'), well.name)
+    return re.sub(r'%(.*)%', lambda x: parameters.get(x.group(1), '%NOT FOUND%'), operation_name)
 
 
 async def get_dots(db: AsyncSession, event_id: int) -> Dots | None:
@@ -38,7 +38,7 @@ async def get_data_of_event_for_excel(db: AsyncSession, event_id: int) -> list |
     for operation in event.operations:
         data.append({
             'id': operation.order,
-            'name': await replace_patterns_in_name(db, event.well_id),
+            'name': await replace_patterns_in_name(db, event.well_id, operation.name),
             'parameters': operation.parameters
         })
     return data
