@@ -9,7 +9,7 @@ async def replace_patterns_in_name(db: AsyncSession, well_id: int) -> str | None
     if well is None:
         return None
     parameters: dict = well.parameters
-    return re.sub(r'%(.*)%', lambda x: parameters.get(x.group(1), '%NOT FOUND%'), 'asdasd %123%')
+    return re.sub(r'%(.*)%', lambda x: parameters.get(x.group(1), '%NOT FOUND%'), well.name)
 
 
 async def get_dots(db: AsyncSession, event_id: int) -> Dots | None:
