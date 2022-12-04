@@ -62,7 +62,7 @@ class Excel:
                 self.__create_cells(f"G{self.numb_in_sec}", f"=F{self.numb_in_sec}/24", font=font_,
                                     alignment=Alignment(vertical="center", horizontal="center"))
 
-            self.__create_cells(f"H{self.numb_in_sec}", string["actual depth"], font=font_,
+            self.__create_cells(f"H{self.numb_in_sec}", string["actualDepth"], font=font_,
                                 alignment=Alignment(vertical="center", horizontal="center"))
             self.__create_cells(f"I{self.numb_in_sec}", f"=F{self.numb_in_sec}-C{self.numb_in_sec}", font=font_,
                                 alignment=Alignment(vertical="center", horizontal="center"))
