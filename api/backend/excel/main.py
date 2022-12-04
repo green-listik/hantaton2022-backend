@@ -38,7 +38,7 @@ class Excel:
                                 alignment=Alignment(horizontal="center", vertical="center"))
             self.__create_cells(f"B{self.numb_in_sec}", elem["name"], font=font_,
                                 alignment=Alignment(vertical="center"))
-            self.__create_cells(f"C{self.numb_in_sec}", string["planned time"], font=font_,
+            self.__create_cells(f"C{self.numb_in_sec}", string["plannedTime"], font=font_,
                                 alignment=Alignment(vertical="center", horizontal="center"))
 
             if str(self.ws[f"D{self.numb_in_sec - 1}"].value).replace(".", "", 1).isdigit():
@@ -49,9 +49,9 @@ class Excel:
                 self.__create_cells(f"D{self.numb_in_sec}", f"=C{self.numb_in_sec}/24", font=font_,
                                     alignment=Alignment(vertical="center", horizontal="center"))
 
-            self.__create_cells(f"E{self.numb_in_sec}", string["planned depth"], font=font_,
+            self.__create_cells(f"E{self.numb_in_sec}", string["plannedDepth"], font=font_,
                                 alignment=Alignment(vertical="center", horizontal="center"))
-            self.__create_cells(f"F{self.numb_in_sec}", string["actual time"], font=font_,
+            self.__create_cells(f"F{self.numb_in_sec}", string["actualTime"], font=font_,
                                 alignment=Alignment(vertical="center", horizontal="center"))
 
             if str(self.ws[f"G{self.numb_in_sec - 1}"].value).replace(".", "", 1).isdigit():
@@ -75,8 +75,8 @@ class Excel:
                 self.__create_cells(f"J{self.numb_in_sec}", f"=I{self.numb_in_sec}/24", font=font_,
                                     alignment=Alignment(vertical="center", horizontal="center"))
 
-            if "actual NPT" in string.keys():
-                self.__create_cells(f"K{self.numb_in_sec}", string["actual NPT"], font=font_,
+            if "plannedNpt" in string.keys():
+                self.__create_cells(f"K{self.numb_in_sec}", string["plannedNpt"], font=font_,
                                     alignment=Alignment(vertical="center", horizontal="center"))
             self.__create_cells(f"L{self.numb_in_sec}", f"=E{self.numb_in_sec}-K{self.numb_in_sec}", font=font_,
                                 alignment=Alignment(vertical="center", horizontal="center"))
@@ -89,12 +89,12 @@ class Excel:
                 self.__create_cells(f"M{self.numb_in_sec}", f"=K{self.numb_in_sec}/24", font=font_,
                                     alignment=Alignment(vertical="center", horizontal="center"))
 
-            if "Short details on NPT" in string.keys():
-                self.__create_cells(f"N{self.numb_in_sec}", string["Short details on NPT"], font=font_,
+            if "nptComment" in string.keys():
+                self.__create_cells(f"N{self.numb_in_sec}", string["nptComment"], font=font_,
                                     alignment=Alignment(vertical="center", horizontal="center"))
 
-            if "ILT or extra to mKPI (hrs)" in string.keys():
-                self.__create_cells(f"O{self.numb_in_sec}", string["Short details on NPT"], font=font_,
+            if "actualIlt" in string.keys():
+                self.__create_cells(f"O{self.numb_in_sec}", string["actualIlt"], font=font_,
                                     alignment=Alignment(vertical="center", horizontal="center"))
 
             if str(self.ws[f"P{self.numb_in_sec - 1}"].value).replace(".", "", 1).isdigit():
@@ -115,8 +115,8 @@ class Excel:
                                     f"=(F{self.numb_in_sec}-K{self.numb_in_sec}-O{self.numb_in_sec})/24", font=font_,
                                     alignment=Alignment(vertical="center", horizontal="center"))
 
-            if "Short details on ILT" in string.keys():
-                self.__create_cells(f"R{self.numb_in_sec}", string["Short details on ILT"], font=font_,
+            if "iltComment" in string.keys():
+                self.__create_cells(f"R{self.numb_in_sec}", string["iltComment"], font=font_,
                                     alignment=Alignment(vertical="center", horizontal="center"))
 
             self.numb_in_sec += 1
